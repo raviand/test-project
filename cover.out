@@ -1,0 +1,15 @@
+mode: set
+github.com/raviand/test-project/internal/service/service.go:25.48,27.2 1 0
+github.com/raviand/test-project/internal/service/service.go:29.67,32.2 1 0
+github.com/raviand/test-project/internal/service/service.go:34.59,36.2 1 0
+github.com/raviand/test-project/internal/client/db/db.go:16.29,18.2 1 0
+github.com/raviand/test-project/internal/client/db/db.go:20.54,21.18 1 1
+github.com/raviand/test-project/internal/client/db/db.go:21.18,23.3 1 0
+github.com/raviand/test-project/internal/client/db/db.go:24.2,28.19 2 1
+github.com/raviand/test-project/internal/client/db/mock.go:16.58,18.18 2 1
+github.com/raviand/test-project/internal/client/db/mock.go:18.18,20.3 1 0
+github.com/raviand/test-project/internal/client/db/mock.go:21.2,21.27 1 1
+github.com/raviand/test-project/internal/client/db/mock.go:21.27,27.3 2 1
+github.com/raviand/test-project/internal/client/db/mock.go:28.2,28.27 1 0
+github.com/raviand/test-project/internal/client/db/mock.go:28.27,31.3 1 0
+github.com/raviand/test-project/internal/client/db/mock.go:32.2,32.41 1 0
