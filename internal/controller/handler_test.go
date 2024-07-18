@@ -3,11 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/raviand/test-project/internal/audit"
 	"github.com/raviand/test-project/internal/repository"
 	"github.com/raviand/test-project/internal/service"
 	"github.com/raviand/test-project/pkg"
@@ -22,11 +24,40 @@ func GetErrorReceivedAndExpected(t *testing.T, code pkg.ErrorCode, res *httptest
 	return errorResponse, expectedError
 }
 
+func TestMiddleware(t *testing.T) {
+	// given
+	os.Setenv("TOKEN", "this-is-a-token")
+	db := repository.NewDatabase("filePath")
+	svc := service.NewProductService(db)
+	audit := make(chan audit.AuditLog)
+	handler := NewHandler(svc, audit)
+	r := chi.NewRouter()
+	r.Use(handler.TokenMiddleware)
+	r.Get("/product", handler.GetAll)
+	req := httptest.NewRequest("GET", "/product", nil)
+
+	t.Run("should pass the token middleware and succeed the authentication", func(t *testing.T) {
+		req.Header.Set("Authorization", "this-is-a-token")
+		res := httptest.NewRecorder()
+		r.ServeHTTP(res, req)
+		require.Equal(t, 200, res.Code)
+	})
+
+	t.Run("should reject the request due to token difference", func(t *testing.T) {
+		req.Header.Set("Authorization", "this-is-a-different-token")
+		res := httptest.NewRecorder()
+		r.ServeHTTP(res, req)
+		require.Equal(t, 401, res.Code)
+	})
+	close(audit)
+}
+
 func TestProductSave(t *testing.T) {
 	// given
-	db := repository.NewDatabase()
+	db := repository.NewDatabase("filePath")
 	svc := service.NewProductService(db)
-	handler := NewHandler(svc)
+	audit := make(chan audit.AuditLog)
+	handler := NewHandler(svc, audit)
 	t.Run("should create a new product", func(t *testing.T) {
 		p := pkg.CreateProductRequest{
 			Name:        "Tv Samsung",
@@ -84,9 +115,11 @@ func TestProductSave(t *testing.T) {
 		errorResponse, expectedError := GetErrorReceivedAndExpected(t, pkg.WrongFieldValues, res)
 		require.Equal(t, expectedError, errorResponse)
 	})
+	close(audit)
 }
 
 func TestProductGet(t *testing.T) {
+	audit := make(chan audit.AuditLog)
 	r := chi.NewRouter()
 	db := test.NewFakeDb()
 	db.FakeMap = map[int]*pkg.Product{
@@ -110,7 +143,7 @@ func TestProductGet(t *testing.T) {
 		},
 	}
 	svc := service.NewProductService(db)
-	handler := NewHandler(svc)
+	handler := NewHandler(svc, audit)
 	r.Get("/product/{id}", handler.GetByID)
 	r.Get("/product", handler.GetAll)
 
@@ -146,7 +179,7 @@ func TestProductGet(t *testing.T) {
 		res := httptest.NewRecorder()
 		r.ServeHTTP(res, req)
 		require.Equal(t, 400, res.Code)
-		errorResponse, expectedError := GetErrorReceivedAndExpected(t, pkg.WrongFieldValues, res)
+		errorResponse, expectedError := GetErrorReceivedAndExpected(t, pkg.BadRequest, res)
 		require.Equal(t, expectedError, errorResponse)
 	})
 	t.Run("should fail due to not found error", func(t *testing.T) {
@@ -157,4 +190,5 @@ func TestProductGet(t *testing.T) {
 		errorResponse, expectedError := GetErrorReceivedAndExpected(t, pkg.NotFound, res)
 		require.Equal(t, expectedError, errorResponse)
 	})
+	close(audit)
 }

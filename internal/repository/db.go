@@ -11,14 +11,16 @@ type Database interface {
 }
 
 type db struct {
+	filePath string
 	products map[int]*pkg.Product
 	lastId   int
 }
 
-func NewDatabase() Database {
+func NewDatabase(filePath string) Database {
 	return &db{
 		products: make(map[int]*pkg.Product),
 		lastId:   0,
+		filePath: filePath,
 	}
 }
 

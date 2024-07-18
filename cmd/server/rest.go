@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/raviand/test-project/internal/controller"
 )
 
@@ -17,6 +18,11 @@ type server struct {
 
 func NewServer(handler controller.Handler) Interface {
 	rt := chi.NewRouter()
+	// token middleware to check if the request has the correct token
+	rt.Use(middleware.DefaultLogger)
+	rt.Use(handler.TokenMiddleware)
+	rt.Use(handler.AuditLog)
+
 	rt.Route("/product", func(r chi.Router) {
 		r.Get("/", handler.GetAll)
 		r.Get("/{id}", handler.GetByID)
