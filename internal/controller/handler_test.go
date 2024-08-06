@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-chi/chi/v5"
 	"github.com/raviand/test-project/internal/audit"
 	"github.com/raviand/test-project/internal/repository"
@@ -27,7 +28,12 @@ func GetErrorReceivedAndExpected(t *testing.T, code pkg.ErrorCode, res *httptest
 func TestMiddleware(t *testing.T) {
 	// given
 	os.Setenv("TOKEN", "this-is-a-token")
-	db := repository.NewDatabase("filePath")
+	DB, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error initializing mock database: %v", err)
+	}
+	defer DB.Close()
+	db := repository.NewDatabase(DB)
 	svc := service.NewProductService(db)
 	audit := make(chan audit.AuditLog)
 	handler := NewHandler(svc, audit)
@@ -37,6 +43,7 @@ func TestMiddleware(t *testing.T) {
 	req := httptest.NewRequest("GET", "/product", nil)
 
 	t.Run("should pass the token middleware and succeed the authentication", func(t *testing.T) {
+		mock.ExpectQuery("select p.id, p.name, p.quantity, p.price, p.code_value,  p.is_published from product p").WillReturnRows(sqlmock.NewRows([]string{"id", "name", "quantity", "price", "code_value", "is_published"}).AddRow(1, "test", 1, 1, "test", true))
 		req.Header.Set("Authorization", "this-is-a-token")
 		res := httptest.NewRecorder()
 		r.ServeHTTP(res, req)
@@ -54,7 +61,13 @@ func TestMiddleware(t *testing.T) {
 
 func TestProductSave(t *testing.T) {
 	// given
-	db := repository.NewDatabase("filePath")
+	DB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	if err != nil {
+		t.Fatalf("Error initializing mock database: %v", err)
+	}
+	defer DB.Close()
+
+	db := repository.NewDatabase(DB)
 	svc := service.NewProductService(db)
 	audit := make(chan audit.AuditLog)
 	handler := NewHandler(svc, audit)
@@ -67,6 +80,7 @@ func TestProductSave(t *testing.T) {
 			IsPublished: false,
 			Expiration:  "12/05/2023",
 		}
+		mock.ExpectExec("INSERT INTO product (name, price, quantity, code_value, is_published, expiration) VALUES (?, ?, ?, ?, ?, ?)").WithArgs(p.Name, p.Price, p.Quantity, p.CodeValue, p.IsPublished, time.Date(2023, 5, 12, 0, 0, 0, 0, time.UTC)).WillReturnResult(sqlmock.NewResult(1, 1))
 		b, err := json.Marshal(p)
 		require.NoError(t, err)
 		req := httptest.NewRequest("POST", "/product", strings.NewReader(string(b)))

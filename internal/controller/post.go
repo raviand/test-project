@@ -20,14 +20,15 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newProduct := &pkg.Product{
-		Name:        product.Name,
-		Price:       product.Price,
-		Quantity:    product.Quantity,
-		CodeValue:   product.CodeValue,
-		IsPublished: product.IsPublished,
-		Expiration:  t,
+		Name:          product.Name,
+		Price:         product.Price,
+		Quantity:      product.Quantity,
+		CodeValue:     product.CodeValue,
+		IsPublished:   product.IsPublished,
+		Expiration:    t,
+		ProductTypeId: product.ProductType,
 	}
-	if err := h.service.Create(newProduct); err != nil {
+	if err = h.service.Create(newProduct); err != nil {
 		pkg.BuildErrorResponse(w, err.(pkg.ApiError))
 		return
 	}

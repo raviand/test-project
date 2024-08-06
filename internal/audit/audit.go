@@ -60,7 +60,7 @@ func (a *Auditor) Run() {
 		if err := writer.Write(record); err != nil {
 			log.Printf("Failed to write record to CSV: %v", err)
 		}
-		writer.Flush() // Asegurar que los datos se escriban inmediatamente
+		writer.Flush()
 		if err := writer.Error(); err != nil {
 			log.Printf("Error flushing to CSV: %v", err)
 		}
