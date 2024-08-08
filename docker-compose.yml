@@ -1,0 +1,24 @@
+services:
+  test-project:
+    image: test-project
+    build: .
+    container_name: test-project
+    environment:
+      TOKEN: "this-is-my-token"
+      DYNAMO_ENDPOINT: "http://dynamodb-local:8000"
+    ports:
+      - "8080:8080"
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ."
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: "http://dynamodb-local:8000"
+    depends_on:
+      - dynamodb-local

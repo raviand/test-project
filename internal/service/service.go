@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"time"
 
 	"github.com/raviand/test-project/internal/repository"
@@ -14,15 +15,20 @@ type ProductService interface {
 	UpdateCreate(product *pkg.Product) error
 	Patch(id int, product *pkg.ProductPatchRequest) error
 	Delete(id int) error
+	CreateUser(ctx context.Context, user *pkg.User) error
+	GetUser(ctx context.Context, id string) (*pkg.User, error)
+	DeleteUser(ctx context.Context, id string) error
 }
 
 type productService struct {
-	db repository.Database
+	db       repository.Database
+	dynamoDB repository.RepositoryDynamo
 }
 
-func NewProductService(db repository.Database) ProductService {
+func NewProductService(db repository.Database, dynamo repository.RepositoryDynamo) ProductService {
 	return &productService{
-		db: db,
+		db:       db,
+		dynamoDB: dynamo,
 	}
 }
 
@@ -116,4 +122,16 @@ func (s *productService) Delete(id int) error {
 		return pkg.GetError(pkg.BadRequest)
 	}
 	return s.db.Delete(id)
+}
+
+func (s *productService) CreateUser(ctx context.Context, user *pkg.User) error {
+	return s.dynamoDB.Store(ctx, user)
+}
+
+func (s *productService) GetUser(ctx context.Context, id string) (*pkg.User, error) {
+	return s.dynamoDB.GetOne(ctx, id)
+}
+
+func (s *productService) DeleteUser(ctx context.Context, id string) error {
+	return s.dynamoDB.Delete(ctx, id)
 }

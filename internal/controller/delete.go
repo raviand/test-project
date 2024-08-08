@@ -20,3 +20,16 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 	pkg.BuildOkResponse(w, nil, http.StatusNoContent)
 }
+
+func (h *handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		pkg.BuildErrorResponse(w, pkg.GetError(pkg.BadRequest))
+		return
+	}
+	if err := h.service.DeleteUser(r.Context(), id); err != nil {
+		pkg.BuildErrorResponse(w, err.(pkg.ApiError))
+		return
+	}
+	pkg.BuildOkResponse(w, nil, http.StatusNoContent)
+}

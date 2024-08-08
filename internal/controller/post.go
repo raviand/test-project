@@ -35,3 +35,16 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	pkg.BuildOkResponse(w, newProduct, http.StatusCreated)
 }
+
+func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user pkg.User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		pkg.BuildErrorResponse(w, pkg.GetError(pkg.BadRequest))
+		return
+	}
+	if err := h.service.CreateUser(r.Context(), &user); err != nil {
+		pkg.BuildErrorResponse(w, err.(pkg.ApiError))
+		return
+	}
+	pkg.BuildOkResponse(w, user, http.StatusCreated)
+}

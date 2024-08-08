@@ -57,3 +57,16 @@ type ProductPatchRequest struct {
 	IsPublished *bool    `json:"is_published,omitempty"`
 	Expiration  *string  `json:"expiration,omitempty"`
 }
+
+type User struct {
+	Id         string `json:"id"`
+	Firstname  string `json:"firstname"`
+	Lastname   string `json:"lastname"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	Email      string `json:"email"`
+	IP         string `json:"ip"`
+	MacAddress string `json:"macAddress"`
+	Website    string `json:"website"`
+	Image      string `json:"image"`
+}

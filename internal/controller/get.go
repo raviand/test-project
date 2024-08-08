@@ -30,3 +30,21 @@ func (h *handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 	pkg.BuildOkResponse(w, product, http.StatusOK)
 }
+
+func (h *handler) GetUserById(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		pkg.BuildErrorResponse(w, pkg.GetError(pkg.BadRequest))
+		return
+	}
+	user, err := h.service.GetUser(r.Context(), id)
+	if err != nil {
+		pkg.BuildErrorResponse(w, err.(pkg.ApiError))
+		return
+	}
+	if user == nil {
+		pkg.BuildErrorResponse(w, pkg.GetError(pkg.NotFound))
+		return
+	}
+	pkg.BuildOkResponse(w, user, http.StatusOK)
+}

@@ -32,6 +32,12 @@ func NewServer(handler controller.Handler) Interface {
 		r.Delete("/{id}", handler.Delete)
 	})
 
+	rt.Route("/user", func(r chi.Router) {
+		r.Get("/{id}", handler.GetUserById)
+		r.Post("/", handler.CreateUser)
+		r.Delete("/{id}", handler.DeleteUser)
+	})
+
 	return &server{
 		rt: rt,
 	}

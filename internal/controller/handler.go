@@ -18,6 +18,9 @@ type Handler interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 	TokenMiddleware(next http.Handler) http.Handler
 	AuditLog(next http.Handler) http.Handler
+	GetUserById(w http.ResponseWriter, r *http.Request)
+	CreateUser(w http.ResponseWriter, r *http.Request)
+	DeleteUser(w http.ResponseWriter, r *http.Request)
 }
 
 type handler struct {
