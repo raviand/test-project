@@ -47,4 +47,5 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pkg.BuildOkResponse(w, user, http.StatusCreated)
+
 }

@@ -93,9 +93,7 @@ func (receiver *dynamoRepository) Delete(ctx context.Context, id string) error {
 	if out == nil {
 		return pkg.GetError(pkg.InternalError)
 	}
-	if out.Attributes == nil {
-		return pkg.GetError(pkg.NotFound)
-	}
+
 	return err
 }
 
