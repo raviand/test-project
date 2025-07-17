@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -14,6 +15,7 @@ type RepositoryDynamo interface {
 	GetOne(ctx context.Context, id string) (*pkg.User, error)
 	Delete(ctx context.Context, id string) error
 	Update(ctx context.Context, model *pkg.User) error
+	ListAll(ctx context.Context) ([]pkg.User, error)
 }
 
 func itemToUser(input map[string]*dynamodb.AttributeValue) (*pkg.User, error) {
@@ -35,6 +37,27 @@ func NewDynamoRepository(dynamo *dynamodb.DynamoDB, table string) RepositoryDyna
 		dynamo: dynamo,
 		table:  table,
 	}
+}
+
+func (receiver *dynamoRepository) ListAll(ctx context.Context) ([]pkg.User, error) {
+	users := make([]pkg.User, 0)
+	err := receiver.dynamo.ScanPagesWithContext(ctx, &dynamodb.ScanInput{
+		TableName: aws.String(receiver.table),
+	}, func(page *dynamodb.ScanOutput, lastPage bool) bool { // ScanOutput en lugar de QueryOutput
+		for _, i := range page.Items {
+			user, err := itemToUser(i)
+			if err != nil {
+				fmt.Printf("Error unmarshaling item: %v\n", err)
+				return false // Detener la paginación en caso de error
+			}
+			users = append(users, *user)
+		}
+		return !lastPage
+	})
+	if err != nil {
+		return nil, pkg.GetError(pkg.InternalError)
+	}
+	return users, nil
 }
 
 func (receiver *dynamoRepository) Store(ctx context.Context, model *pkg.User) error {

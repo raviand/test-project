@@ -56,7 +56,7 @@ func InitDynamo() (*dynamodb.DynamoDB, error) {
 	region := "us-west-2"
 	endpoint := os.Getenv("DYNAMO_ENDPOINT")
 	cred := credentials.NewStaticCredentials("local", "local", "")
-	sess, err := session.NewSession(aws.NewConfig().WithEndpoint(endpoint).WithRegion(region).WithCredentials(cred))
+	sess, err := session.NewSession(aws.NewConfig().WithEndpoint(endpoint).WithRegion(region).WithCredentials(cred).WithDisableSSL(true))
 	if err != nil {
 		return nil, err
 	}

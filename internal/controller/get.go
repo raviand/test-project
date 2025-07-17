@@ -48,3 +48,12 @@ func (h *handler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	}
 	pkg.BuildOkResponse(w, user, http.StatusOK)
 }
+
+func (h *handler) ListAllUsers(w http.ResponseWriter, r *http.Request) {
+	usrs, err := h.service.ListAllUsers(r.Context())
+	if err != nil {
+		pkg.BuildErrorResponse(w, err.(pkg.ApiError))
+	}
+	pkg.BuildOkResponse(w, usrs, http.StatusOK)
+
+}

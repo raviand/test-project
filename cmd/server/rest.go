@@ -36,6 +36,7 @@ func NewServer(handler controller.Handler) Interface {
 		r.Get("/{id}", handler.GetUserById)
 		r.Post("/", handler.CreateUser)
 		r.Delete("/{id}", handler.DeleteUser)
+		r.Get("/", handler.ListAllUsers)
 	})
 
 	return &server{

@@ -1,2 +1,0 @@
-with-expecter: true
-output: ./internal/mocks

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -21,6 +22,7 @@ type Handler interface {
 	GetUserById(w http.ResponseWriter, r *http.Request)
 	CreateUser(w http.ResponseWriter, r *http.Request)
 	DeleteUser(w http.ResponseWriter, r *http.Request)
+	ListAllUsers(w http.ResponseWriter, r *http.Request)
 }
 
 type handler struct {
@@ -29,6 +31,8 @@ type handler struct {
 }
 
 func NewHandler(service service.ProductService, auditChannel chan<- audit.AuditLog) Handler {
+
+	fmt.Println()
 	return &handler{
 		service:      service,
 		auditChannel: auditChannel,

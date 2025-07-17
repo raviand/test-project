@@ -18,6 +18,7 @@ type ProductService interface {
 	CreateUser(ctx context.Context, user *pkg.User) error
 	GetUser(ctx context.Context, id string) (*pkg.User, error)
 	DeleteUser(ctx context.Context, id string) error
+	ListAllUsers(ctx context.Context) ([]pkg.User, error)
 }
 
 type productService struct {
@@ -30,6 +31,10 @@ func NewProductService(db repository.Database, dynamo repository.RepositoryDynam
 		db:       db,
 		dynamoDB: dynamo,
 	}
+}
+
+func (s *productService) ListAllUsers(ctx context.Context) ([]pkg.User, error) {
+	return s.dynamoDB.ListAll(ctx)
 }
 
 func (s *productService) GetAll() ([]*pkg.Product, error) {
